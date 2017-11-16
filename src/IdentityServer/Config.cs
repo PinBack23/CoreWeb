@@ -27,7 +27,7 @@ namespace IdentityServer
                 new Client
                 {
                     ClientId = "client",
-                    AllowedGrantTypes = GrantTypes.ClientCredentials,
+                    AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
 
                     ClientSecrets =
                     {
@@ -38,24 +38,24 @@ namespace IdentityServer
             };
         }
 
-        //public static List<TestUser> GetUsers()
-        //{
-        //    return new List<TestUser>
-        //    {
-        //        new TestUser
-        //        {
-        //            SubjectId = "1",
-        //            Username = "alice",
-        //            Password = "password"
-        //        },
-        //        new TestUser
-        //        {
-        //            SubjectId = "2",
-        //            Username = "bob",
-        //            Password = "password"
-        //        }
-        //    };
-        //}
+        public static List<TestUser> GetUsers()
+        {
+            return new List<TestUser>
+            {
+                new TestUser
+                {
+                    SubjectId = "1",
+                    Username = "alice",
+                    Password = "password"
+                },
+                new TestUser
+                {
+                    SubjectId = "2",
+                    Username = "bob",
+                    Password = "password"
+                }
+            };
+        }
 
     }
 }
