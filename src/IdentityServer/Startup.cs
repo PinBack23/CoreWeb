@@ -18,24 +18,40 @@ namespace IdentityServer
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddMvc();
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+
             services.AddIdentityServer()
                 .AddDeveloperSigningCredential()
+                .AddInMemoryIdentityResources(Config.GetIdentityResources())
                 .AddInMemoryApiResources(Config.GetApiResources())
                 .AddInMemoryClients(Config.GetClients())
                 .AddTestUsers(Config.GetUsers());
 
-            services.AddMvcCore()
-                .AddAuthorization()
-                .AddJsonFormatters();
-
-            services.AddAuthentication("Bearer")
-                .AddIdentityServerAuthentication(options =>
+            services.AddAuthentication(options =>
+            {
+                options.DefaultScheme = "Cookies";
+                options.DefaultChallengeScheme = "oidc";
+            })
+                .AddCookie("Cookies")
+                .AddOpenIdConnect("oidc", options =>
                 {
+                    options.SignInScheme = "Cookies";
+
                     options.Authority = "http://localhost:5000";
                     options.RequireHttpsMetadata = false;
-                    //options.ApiSecret = "secret";
-                    options.ApiName = "api1";
+                    options.ClientId = "mvc";
+                    options.SaveTokens = true;
                 });
+
+            //services.AddAuthentication("Bearer")
+            //    .AddIdentityServerAuthentication(options =>
+            //    {
+            //        options.Authority = "http://localhost:5000";
+            //        options.RequireHttpsMetadata = false;
+            //        //options.ApiSecret = "secret";
+            //        options.ApiName = "api1";
+            //    });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -45,11 +61,10 @@ namespace IdentityServer
             {
                 app.UseDeveloperExceptionPage();
             }
-
-            //Route Default Files (index.html) https://wipdeveloper.com/2016/01/09/asp-net-5-static-files-enable-default-files/
-            app.UseDefaultFiles();
-            //Route zu wwwroot
-            app.UseStaticFiles();
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+            }
 
             // api
             //app.MapWhen(context => context.Request.Path.Value.StartsWith("/api"), map =>
@@ -91,7 +106,13 @@ namespace IdentityServer
             //});
 
             app.UseAuthentication();
-            app.UseMvc();
+
+            //Route Default Files (index.html) https://wipdeveloper.com/2016/01/09/asp-net-5-static-files-enable-default-files/
+            app.UseDefaultFiles();
+            //Route zu wwwroot
+            app.UseStaticFiles();
+            app.UseMvcWithDefaultRoute();
+            //app.UseMvc();
         }
     }
 }
